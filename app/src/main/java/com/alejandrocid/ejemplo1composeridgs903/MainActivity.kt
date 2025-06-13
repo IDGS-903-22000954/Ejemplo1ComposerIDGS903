@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,16 +25,21 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 private val tarjetas: List<PersonajeTarjeta> = listOf(
-    PersonajeTarjeta("Chi-Chi", "Esposa de Goku y madre de Gohan. Es la princesa del Monte Fry-pan siendo la hija de la fallecida reina de esta montaña y el Rey Gyuma, ella terminaría conociendo a Son Goku cuando era tan solo una niña para años más tarde durante su adolescencia ser su esposa y convertirse en la estricta pero amorosa madre de Gohan y Goten."),
+    PersonajeTarjeta("ChiChi", "Esposa de Goku y madre de Gohan. Es la princesa del Monte Fry-pan siendo la hija de la fallecida reina de esta montaña y el Rey Gyuma, ella terminaría conociendo a Son Goku cuando era tan solo una niña para años más tarde durante su adolescencia ser su esposa y convertirse en la estricta pero amorosa madre de Gohan y Goten."),
     PersonajeTarjeta("Goku", "El protagonista de la serie, conocido por su gran poder y personalidad amigable."),
     PersonajeTarjeta("Launch", "Personaje que sufre cambios de personalidad al estornudar."),
     PersonajeTarjeta("Vegeta", "Príncipe de los Saiyans, inicialmente un villano, pero luego se une a los Z Fighters."),
@@ -79,36 +85,46 @@ class MainActivity : ComponentActivity() {
             modifier = Modifier.padding(8.dp)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            ImagenHeroe()
+            ImagenHeroe(personaje.title)
             Personajes(personaje)
         }
     }
 
 
     @Composable
-    fun Personaje(name: String, color: Color, style: TextStyle){
+    fun Personaje(name: String, color: Color, style: TextStyle, lines:Int=Int.MAX_VALUE){
         Column {
-            Text(text = name)
+            Text(text = name, color = color, style = style, maxLines = lines)
         }
     }
 
     @Composable
     fun Personajes(personaje: PersonajeTarjeta){
-        Column {
+        var expanded by remember { mutableStateOf(false) }
+        Column (
+            modifier = Modifier.padding(start = 8.dp).clickable {
+                expanded = !expanded
+            }
+        ){
             Personaje(personaje.title,
                 MaterialTheme.colorScheme.primary,
                 MaterialTheme.typography.headlineMedium)
 
             Personaje(personaje.body,
                 MaterialTheme.colorScheme.onBackground,
-                MaterialTheme.typography.bodyLarge)
+                MaterialTheme.typography.bodyLarge,
+                if (expanded) Int.MAX_VALUE else 1)
         }
     }
 
     @Composable
-    fun ImagenHeroe(){
+    fun ImagenHeroe(imageName: String){
+        val context = LocalContext.current
+        val ImageResId = remember (imageName) {
+            context.resources.getIdentifier(imageName.lowercase(),"drawable", context.packageName)
+        }
         Image(
-            painter = painterResource(R.drawable.chichi),
+            painter = painterResource(id = ImageResId),
             contentDescription = "Chi Chi",
             modifier = Modifier
                 .padding(16.dp)
